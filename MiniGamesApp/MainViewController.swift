@@ -115,6 +115,13 @@ class MainViewController: UIViewController {
                     arr.forEach {
                         self.segmentedControl.setEnabled(false, forSegmentAt: $0)
                     }
+                    switch arr.count {
+                    case 1:
+                        self.segmentedControl.selectedSegmentIndex = 1
+                    case 2:
+                        self.segmentedControl.selectedSegmentIndex = 0
+                    default: ()
+                    }
                 }
             }
         }

@@ -10,11 +10,15 @@ import FirebaseFirestore
 
 final class MainViewModel {
 
+    private let server = SticksServer()
+
     private var count = 21 {
         didSet {
+            server.playerAction(count)
             if count < 3 {
                 onDisableSegment?(Array(count...2))
             }
+            onDataReceived?(count)
         }
     }
 
@@ -36,14 +40,18 @@ final class MainViewModel {
         onAppear = { [weak self] in
             guard let self else { return }
             print("Did appear")
-            onDataReceived?(count)
+            server.gameListener { [weak self] count in
+                if self?.count != count {
+                    self?.count = count
+                }
+            }
         }
 
         onButtonTapped = { [weak self] num in
             guard let self else { return }
             if count >= num {
                 count -= num
-                onDataReceived?(count)
+//                server.playerAction(count)
             }
         }
 
@@ -51,7 +59,7 @@ final class MainViewModel {
             guard let self else { return }
             print("Restart")
             count = 21
-            onDataReceived?(count)
+//            server.playerAction(count)
             onDisableSegment?([])
         }
     }
