@@ -11,6 +11,7 @@
 		180243C82CBFEDC000CDDC3D /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 180243C72CBFEDC000CDDC3D /* FirebaseCore */; };
 		180243CA2CBFEDC000CDDC3D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 180243C92CBFEDC000CDDC3D /* FirebaseFirestore */; };
 		180243CC2CBFEDC000CDDC3D /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 180243CB2CBFEDC000CDDC3D /* FirebaseStorage */; };
+		180243DA2CBFF01400CDDC3D /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 180243D92CBFF01400CDDC3D /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 				180243CC2CBFEDC000CDDC3D /* FirebaseStorage in Frameworks */,
 				180243C62CBFEDC000CDDC3D /* FirebaseAuth in Frameworks */,
 				180243CA2CBFEDC000CDDC3D /* FirebaseFirestore in Frameworks */,
+				180243DA2CBFF01400CDDC3D /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +95,7 @@
 				180243C72CBFEDC000CDDC3D /* FirebaseCore */,
 				180243C92CBFEDC000CDDC3D /* FirebaseFirestore */,
 				180243CB2CBFEDC000CDDC3D /* FirebaseStorage */,
+				180243D92CBFF01400CDDC3D /* SnapKit */,
 			);
 			productName = MiniGamesApp;
 			productReference = 180243A82CBFE57500CDDC3D /* MiniGamesApp.app */;
@@ -124,6 +127,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				180243C42CBFEDC000CDDC3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				180243D82CBFF01400CDDC3D /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 180243A92CBFE57500CDDC3D /* Products */;
@@ -375,6 +379,14 @@
 				minimumVersion = 11.3.0;
 			};
 		};
+		180243D82CBFF01400CDDC3D /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -397,6 +409,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 180243C42CBFEDC000CDDC3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		180243D92CBFF01400CDDC3D /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 180243D82CBFF01400CDDC3D /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
