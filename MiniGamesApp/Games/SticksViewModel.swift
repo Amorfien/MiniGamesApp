@@ -6,9 +6,12 @@
 //
 
 import Foundation
+import FirebaseAuth
 import FirebaseFirestore
 
-final class MainViewModel {
+final class SticksViewModel {
+
+    private let user: User
 
     private let server = SticksServer()
 
@@ -43,7 +46,8 @@ final class MainViewModel {
     var onCountChanged: ((Int) -> Void)?
     var onDisableSegment: (([Int]) -> Void)?
 
-    init() {
+    init(user: User) {
+        self.user = user
         binding()
     }
 

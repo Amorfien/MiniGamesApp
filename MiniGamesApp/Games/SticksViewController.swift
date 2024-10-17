@@ -8,9 +8,9 @@
 import UIKit
 import SnapKit
 
-class MainViewController: UIViewController {
+class SticksViewController: UIViewController {
 
-    private let viewModel = MainViewModel()
+    private let viewModel: SticksViewModel
 
     private let countLabel: UILabel = {
         let label = UILabel()
@@ -66,6 +66,15 @@ class MainViewController: UIViewController {
         return stackView
     }()
 
+    init(viewModel: SticksViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Main Screen"
@@ -75,8 +84,6 @@ class MainViewController: UIViewController {
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.centerY.equalToSuperview().offset(-120)
-//            $0.width.lessThanOrEqualToSuperview().inset(32)
-//            $0.width.greaterThanOrEqualTo(200)
             $0.width.equalToSuperview().inset(32)
         }
 
