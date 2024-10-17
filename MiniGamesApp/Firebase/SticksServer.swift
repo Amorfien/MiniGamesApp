@@ -8,16 +8,48 @@
 import Foundation
 import FirebaseFirestore
 
-struct SticksGameState: Equatable {
-    var sticksCount: Int = 21
-    var isFirstPlayerTurn: Bool = true
-    var firstPlayerExists = false
-    var secondPlayerExists = false
-}
-
 final class SticksServer {
 
-    func playerAction(_ state: SticksGameState) {
+    func readGameState(_ completion: @escaping (Result<SticksGameModel, Error>) -> Void) {
+        Firestore.firestore()
+            .collection(Resources.fbGamesCollection)
+            .document(Resources.Games.sticks.rawValue)
+            .getDocument() { snapshot, error in
+                guard error == nil, let snapshot else {
+                    print("ALARM!!! ", error?.localizedDescription ?? "")
+                    return
+                }
+
+                if
+                    let count = snapshot[Resources.fbSticksCount] as? Int,
+                    let isFirstPlayerTurn = snapshot[Resources.fbPlayerTurn] as? Bool,
+                    let firstPlayerID = snapshot[Resources.firstPlayerID] as? String,
+                    let secondPlayerID = snapshot[Resources.secondPlayerID] as? String
+                {
+                    let state = SticksGameModel(
+                        sticksCount: count,
+                        isFirstPlayerTurn: isFirstPlayerTurn,
+                        firstPlayerID: firstPlayerID,
+                        secondPlayerID: secondPlayerID
+                    )
+                    print("WoW ", state.sticksCount, " ", state.isFirstPlayerTurn)
+                    completion(.success(state))
+                }
+            }
+    }
+
+    func activatePlayer(_ player: String, isFirstPlayer: Bool) {
+        Firestore.firestore()
+            .collection(Resources.fbGamesCollection)
+            .document(Resources.Games.sticks.rawValue)
+            .updateData([
+                isFirstPlayer ? Resources.firstPlayerID : Resources.secondPlayerID: player
+            ]) { err in
+                print("Register ", player, " ", isFirstPlayer ? "1st" : "2nd")
+            }
+    }
+
+    func playerAction(_ state: SticksGameModel) {
         Firestore.firestore()
             .collection(Resources.fbGamesCollection)
             .document(Resources.Games.sticks.rawValue)
@@ -29,7 +61,7 @@ final class SticksServer {
             }
     }
 
-    func gameListener(_ completion: @escaping (SticksGameState) -> Void) {
+    func gameListener(_ completion: @escaping (SticksGameModel) -> Void) {
         Firestore.firestore()
             .collection(Resources.fbGamesCollection)
             .document(Resources.Games.sticks.rawValue)
@@ -42,10 +74,15 @@ final class SticksServer {
                 if
                     let count = snapshot[Resources.fbSticksCount] as? Int,
                     let isFirstPlayerTurn = snapshot[Resources.fbPlayerTurn] as? Bool,
-                    let firstPlayerExists = snapshot[Resources.firstPlayerExists] as? Bool,
-                    let secondPlayerExists = snapshot[Resources.secondPlayerExists] as? Bool
+                    let firstPlayerID = snapshot[Resources.firstPlayerID] as? String,
+                    let secondPlayerID = snapshot[Resources.secondPlayerID] as? String
                 {
-                    let state = SticksGameState(sticksCount: count, isFirstPlayerTurn: isFirstPlayerTurn, firstPlayerExists: firstPlayerExists, secondPlayerExists: secondPlayerExists)
+                    let state = SticksGameModel(
+                        sticksCount: count,
+                        isFirstPlayerTurn: isFirstPlayerTurn,
+                        firstPlayerID: firstPlayerID,
+                        secondPlayerID: secondPlayerID
+                    )
                     print("WoW ", state.sticksCount, " ", state.isFirstPlayerTurn)
                     completion(state)
                 }

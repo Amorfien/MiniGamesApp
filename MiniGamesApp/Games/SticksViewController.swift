@@ -15,7 +15,7 @@ class SticksViewController: UIViewController {
     private let countLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.numberOfLines = 2
+        label.numberOfLines = 3
         return label
     }()
 
@@ -83,9 +83,11 @@ class SticksViewController: UIViewController {
 
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.centerY.equalToSuperview().offset(-120)
-            $0.width.equalToSuperview().inset(32)
+            $0.centerY.equalToSuperview().offset(-100)
+            $0.width.equalToSuperview().inset(48)
         }
+
+        viewModel.viewDidLoad?()
 
         binding()
     }
@@ -110,7 +112,7 @@ class SticksViewController: UIViewController {
 
         viewModel.onCountChanged = { [weak self] count in
             guard let self else { return }
-            let text = count > 0 ? String(repeating: "🥕", count: count) : "GAME OVER"
+            let text = count > 0 ? String(repeating: " 🥕 ", count: count) : "GAME OVER"
             DispatchQueue.main.async {
                 self.countLabel.text = text
             }

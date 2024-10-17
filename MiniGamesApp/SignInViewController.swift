@@ -20,7 +20,7 @@ final class SignInViewController: UIViewController {
             guard let self else { return }
                 viewModel.onSignInTapped?()
         }))
-        button.setTitle("SignIn", for: .normal)
+        button.setTitle("Sign In", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .tintColor
         button.layer.cornerRadius = 8
@@ -35,6 +35,7 @@ final class SignInViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(resource: .primary)
         view.addSubviews(signInButton)
         signInButton.snp.makeConstraints {
             $0.center.equalToSuperview()

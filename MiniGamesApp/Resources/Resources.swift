@@ -17,6 +17,6 @@ enum Resources {
     
     static let fbSticksCount = "count"
     static let fbPlayerTurn = "isFirstPlayerTurn"
-    static let firstPlayerExists = "firstPlayerExists"
-    static let secondPlayerExists = "secondPlayerExists"
+    static let firstPlayerID = "firstPlayerID"
+    static let secondPlayerID = "secondPlayerID"
 }
