@@ -14,6 +14,9 @@ enum Resources {
     }
 
     static let fbGamesCollection = "games"
+    
     static let fbSticksCount = "count"
-
+    static let fbPlayerTurn = "isFirstPlayerTurn"
+    static let firstPlayerExists = "firstPlayerExists"
+    static let secondPlayerExists = "secondPlayerExists"
 }

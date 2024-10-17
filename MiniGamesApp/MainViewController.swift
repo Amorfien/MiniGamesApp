@@ -15,30 +15,19 @@ class MainViewController: UIViewController {
     private let countLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
+        label.numberOfLines = 2
         return label
-    }()
-
-    private let countTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = " 1 ... 3 "
-        textField.keyboardType = .numberPad
-        textField.textAlignment = .center
-        textField.layer.borderWidth = 0.5
-        return textField
     }()
 
     private let segmentedControl: UISegmentedControl = {
         let segmented = UISegmentedControl(items: ["1️⃣", "2️⃣", "3️⃣"])
-//        segmented.selectedSegmentIndex = 0
+        segmented.selectedSegmentIndex = 0
         return segmented
     }()
 
     private lazy var okButton: UIButton = {
         let button = UIButton(type: .roundedRect, primaryAction: UIAction.init(handler: { [weak self] action in
             guard let self else { return }
-//            if let number = Int(self.countTextField.text ?? "") {
-//                self.viewModel.onButtonTapped?(number)
-//            }
             let choise = segmentedControl.selectedSegmentIndex + 1
             if choise > 0 {
                 viewModel.onButtonTapped?(choise)
@@ -58,15 +47,19 @@ class MainViewController: UIViewController {
             viewModel.onRestartTapped?()
         }))
         button.setTitle("Restart", for: .normal)
-//        button.setTitleColor(.white, for: .normal)
-//        button.backgroundColor = .tintColor
         button.layer.cornerRadius = 8
         button.layer.borderWidth = 0.5
         return button
     }()
 
+    private lazy var playerLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        return label
+    }()
+
     private lazy var stackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [countLabel, segmentedControl, okButton, restartButton])
+        let stackView = UIStackView(arrangedSubviews: [countLabel, segmentedControl, okButton, restartButton, playerLabel])
         stackView.axis = .vertical
         stackView.spacing = 16
         stackView.distribution = .fill
@@ -78,12 +71,14 @@ class MainViewController: UIViewController {
         title = "Main Screen"
         view.backgroundColor = .systemBackground
         view.addSubviews(stackView)
+
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.centerY.equalToSuperview().offset(-120)
-            $0.width.greaterThanOrEqualTo(200)
+//            $0.width.lessThanOrEqualToSuperview().inset(32)
+//            $0.width.greaterThanOrEqualTo(200)
+            $0.width.equalToSuperview().inset(32)
         }
-        hideKeyboardWhenTappedAround()
 
         binding()
     }
@@ -95,9 +90,20 @@ class MainViewController: UIViewController {
 
     private func binding() {
 
-        viewModel.onDataReceived = { [weak self] count in
+        viewModel.isYourTurn = { [weak self] isYourTurn in
             guard let self else { return }
-            let text = count > 0 ? String(repeating: " I ", count: count) : "GAME OVER"
+            DispatchQueue.main.async {
+                self.playerLabel.text = isYourTurn ? "Your turn" : "Opponent's turn"
+                self.playerLabel.textColor  = isYourTurn ? .systemGreen : .systemRed
+                self.okButton.isEnabled = isYourTurn
+                self.okButton.alpha = isYourTurn ? 1 : 0.6
+                self.segmentedControl.isEnabled = isYourTurn
+            }
+        }
+
+        viewModel.onCountChanged = { [weak self] count in
+            guard let self else { return }
+            let text = count > 0 ? String(repeating: "🥕", count: count) : "GAME OVER"
             DispatchQueue.main.async {
                 self.countLabel.text = text
             }

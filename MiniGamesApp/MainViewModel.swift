@@ -12,15 +12,26 @@ final class MainViewModel {
 
     private let server = SticksServer()
 
-    private var count = 21 {
+    private var isFirstPlayer: Bool?
+
+    private var gameState = SticksGameState() {
         didSet {
-            server.playerAction(count)
+            guard oldValue != gameState else { return }
+            if isFirstPlayer == nil {
+                isFirstPlayer = !gameState.secondPlayerExists
+            }
+            let count = gameState.sticksCount
+            server.playerAction(gameState)
             if count < 3 {
                 onDisableSegment?(Array(count...2))
             }
-            onDataReceived?(count)
+            onCountChanged?(count)
+            isYourTurn?(gameState.isFirstPlayerTurn)
         }
     }
+
+    private var lastCount = 21
+    private var lastIsYourTurn = true
 
     // Input
     var onAppear: EmptyClosure?
@@ -28,7 +39,8 @@ final class MainViewModel {
     var onRestartTapped: EmptyClosure?
 
     // Output
-    var onDataReceived: ((Int) -> Void)?
+    var isYourTurn: ((Bool) -> Void)?
+    var onCountChanged: ((Int) -> Void)?
     var onDisableSegment: (([Int]) -> Void)?
 
     init() {
@@ -40,25 +52,30 @@ final class MainViewModel {
         onAppear = { [weak self] in
             guard let self else { return }
             print("Did appear")
-            server.gameListener { [weak self] count in
-                if self?.count != count {
-                    self?.count = count
+            server.gameListener { [weak self] state in
+                guard let self else { return }
+                if gameState != state {
+                    gameState = state
                 }
             }
+            onCountChanged?(gameState.sticksCount)
+            isYourTurn?(gameState.isFirstPlayerTurn)
         }
 
         onButtonTapped = { [weak self] num in
             guard let self else { return }
-            if count >= num {
-                count -= num
-//                server.playerAction(count)
+            if gameState.sticksCount >= num {
+//                gameState.sticksCount -= num
+//                gameState.isFirstPlayer = false
+                let newValue = gameState.sticksCount - num
+                gameState = .init(sticksCount: newValue, isFirstPlayerTurn: false)
             }
         }
 
         onRestartTapped = { [weak self] in
             guard let self else { return }
             print("Restart")
-            count = 21
+            gameState = SticksGameState()
 //            server.playerAction(count)
             onDisableSegment?([])
         }
