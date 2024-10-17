@@ -18,7 +18,7 @@ final class SignInViewModel {
 
     // Output
     var onSuccessSignIn: ((User) -> Void)?
-    var onErrorSignIn: ((String) -> Void)?
+    var onErrorSignIn: StringClosure?
 
     init() {
         binding()
@@ -46,6 +46,5 @@ final class SignInViewModel {
                 }
             }
         }
-
     }
 }

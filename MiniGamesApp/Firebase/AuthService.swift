@@ -13,7 +13,7 @@ enum AuthError: Error {
 }
 
 final class AuthService {
-
+    
     func anonymousSignIn(_ completion: @escaping (Result<User, Error>) -> Void) {
         Auth.auth().signInAnonymously { result, error in
             guard let result, error == nil else {
@@ -23,5 +23,5 @@ final class AuthService {
             completion(.success(result.user))
         }
     }
-
+    
 }

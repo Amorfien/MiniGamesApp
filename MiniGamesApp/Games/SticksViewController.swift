@@ -9,22 +9,22 @@ import UIKit
 import SnapKit
 
 class SticksViewController: UIViewController {
-
+    
     private let viewModel: SticksViewModel
-
+    
     private let countLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
         label.numberOfLines = 3
         return label
     }()
-
+    
     private let segmentedControl: UISegmentedControl = {
         let segmented = UISegmentedControl(items: ["1️⃣", "2️⃣", "3️⃣"])
         segmented.selectedSegmentIndex = 0
         return segmented
     }()
-
+    
     private lazy var okButton: UIButton = {
         let button = UIButton(type: .roundedRect, primaryAction: UIAction.init(handler: { [weak self] action in
             guard let self else { return }
@@ -40,7 +40,7 @@ class SticksViewController: UIViewController {
         button.layer.borderWidth = 0.5
         return button
     }()
-
+    
     private lazy var restartButton: UIButton = {
         let button = UIButton(type: .roundedRect, primaryAction: UIAction.init(handler: { [weak self] action in
             guard let self else { return }
@@ -51,21 +51,27 @@ class SticksViewController: UIViewController {
         button.layer.borderWidth = 0.5
         return button
     }()
-
+    
     private lazy var playerLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
         return label
     }()
-
+    
     private lazy var stackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [countLabel, segmentedControl, okButton, restartButton, playerLabel])
+        let stackView = UIStackView(arrangedSubviews: [
+            countLabel,
+            segmentedControl,
+            okButton,
+            restartButton,
+            playerLabel
+        ])
         stackView.axis = .vertical
-        stackView.spacing = 16
+        stackView.spacing = 20
         stackView.distribution = .fill
         return stackView
     }()
-
+    
     init(viewModel: SticksViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -80,25 +86,30 @@ class SticksViewController: UIViewController {
         title = "Main Screen"
         view.backgroundColor = .systemBackground
         view.addSubviews(stackView)
-
+        
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.centerY.equalToSuperview().offset(-100)
             $0.width.equalToSuperview().inset(48)
         }
-
+        
         viewModel.viewDidLoad?()
-
+        
         binding()
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         viewModel.onAppear?()
     }
-
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        viewModel.viewDidDisappear?()
+    }
+    
     private func binding() {
-
+        
         viewModel.isYourTurn = { [weak self] isYourTurn in
             guard let self else { return }
             DispatchQueue.main.async {
@@ -109,7 +120,7 @@ class SticksViewController: UIViewController {
                 self.segmentedControl.isEnabled = isYourTurn
             }
         }
-
+        
         viewModel.onCountChanged = { [weak self] count in
             guard let self else { return }
             let text = count > 0 ? String(repeating: " 🥕 ", count: count) : "GAME OVER"
@@ -117,7 +128,7 @@ class SticksViewController: UIViewController {
                 self.countLabel.text = text
             }
         }
-
+        
         viewModel.onDisableSegment = { [weak self] arr in
             guard let self else { return }
             print("@", arr)
@@ -130,17 +141,16 @@ class SticksViewController: UIViewController {
                     arr.forEach {
                         self.segmentedControl.setEnabled(false, forSegmentAt: $0)
                     }
-                    switch arr.count {
-                    case 1:
-                        self.segmentedControl.selectedSegmentIndex = 1
-                    case 2:
-                        self.segmentedControl.selectedSegmentIndex = 0
-                    default: ()
-                    }
+                }
+                switch arr.count {
+                case 1:
+                    self.segmentedControl.selectedSegmentIndex = 1
+                default:
+                    self.segmentedControl.selectedSegmentIndex = 0
                 }
             }
         }
     }
-
+    
 }
 

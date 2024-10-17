@@ -17,9 +17,9 @@ final class SignInViewController: UIViewController {
         let button = UIButton(
             type: .roundedRect,
             primaryAction: UIAction.init(handler: { [weak self] action in
-            guard let self else { return }
+                guard let self else { return }
                 viewModel.onSignInTapped?()
-        }))
+            }))
         button.setTitle("Sign In", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .tintColor
