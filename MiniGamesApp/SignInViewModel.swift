@@ -10,6 +10,8 @@ import FirebaseAuth
 
 final class SignInViewModel {
 
+    weak var coordinator: CoordinatorProtocol?
+
     private let authService = AuthService()
 
     // Input
@@ -40,6 +42,9 @@ final class SignInViewModel {
                 case .success(let user):
                     self.onSuccessSignIn?(user)
                     print("SUCCESS SignIn ", user.uid)
+
+                    self.coordinator?.showSticksScreen(for: user)
+
                 case .failure(let failure):
                     self.onErrorSignIn?(failure.localizedDescription)
                     print("ERROR SignIn ", failure.localizedDescription)
