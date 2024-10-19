@@ -8,6 +8,10 @@
 import Foundation
 import FirebaseAuth
 
+protocol SignInViewModelProtocol {
+
+}
+
 final class SignInViewModel {
 
     weak var coordinator: CoordinatorProtocol?

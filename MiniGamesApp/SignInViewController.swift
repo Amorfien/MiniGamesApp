@@ -13,7 +13,7 @@ final class SignInViewController: UIViewController {
     private let viewModel: SignInViewModel
 
     private lazy var signInButton: UIButton = {
-        let button = UIButton( primaryAction: signInAction)
+        let button = UIButton(primaryAction: signInAction)
         button.setTitle("Sign In", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .tintColor
@@ -43,7 +43,7 @@ final class SignInViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(resource: .primary)
+        view.backgroundColor = UIColor(resource: .app)
         view.addSubviews(signInButton)
         signInButton.snp.makeConstraints {
             $0.center.equalToSuperview()

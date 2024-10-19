@@ -9,17 +9,29 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
-final class SticksViewModel {
+enum SticksGameState {
+    case noSecondPlayer
+    case playerTurn(sticksCount: Int, isYourTurn: Bool?)
+    case gameOver(isWinner: Bool?)
+    case error(String)
+}
+
+protocol SticksViewModelProtocol {
+    var viewDidLoad: EmptyClosure? { get }
+    var onAppear: EmptyClosure? { get }
+    var viewDidDisappear: EmptyClosure? { get }
+    var onButtonTapped: IntClosure? { get }
+    var onRestartTapped: EmptyClosure? { get }
+    var onStateChange: ((SticksGameState) -> Void)? { get set }
+}
+
+final class SticksViewModel: SticksViewModelProtocol {
     
     private let user: User
     
     private let server = SticksServer()
     
-    private var isFirstPlayer: Bool? {
-        didSet {
-            print(isFirstPlayer == true ? "FIRST PLAYER" : "Second player")
-        }
-    }
+    private var isFirstPlayer: Bool?
     
     private var gameState = SticksGameModel() {
         didSet {
@@ -28,16 +40,18 @@ final class SticksViewModel {
             if isFirstPlayer == nil {
                 isFirstPlayer = gameState.firstPlayerID.isEmpty
             }
-            
-            let count = gameState.sticksCount
+
             server.playerAction(gameState)
-            if count < 3 {
-                onDisableSegment?(Array(count...2))
+
+            if gameState.firstPlayerID.isEmpty || gameState.secondPlayerID.isEmpty {
+                onStateChange?(.noSecondPlayer)
+            } else {
+                onStateChange?(.playerTurn(sticksCount: gameState.sticksCount,
+                                           isYourTurn: gameState.isFirstPlayerTurn == isFirstPlayer))
             }
-            onCountChanged?(count)
-            isYourTurn?(gameState.isFirstPlayerTurn == isFirstPlayer)
-            if oldValue.sticksCount < gameState.sticksCount {
-                onDisableSegment?([])
+
+            if gameState.sticksCount == 0 {
+                onStateChange?(.gameOver(isWinner: gameState.isFirstPlayerTurn == isFirstPlayer))
             }
         }
     }
@@ -50,10 +64,8 @@ final class SticksViewModel {
     var onRestartTapped: EmptyClosure?
     
     // Output
-    var isYourTurn: BoolClosure?
-    var onCountChanged: IntClosure?
-    var onDisableSegment: (([Int]) -> Void)?
-    
+    var onStateChange: ((SticksGameState) -> Void)?
+
     init(user: User) {
         self.user = user
         binding()
@@ -66,34 +78,36 @@ final class SticksViewModel {
             server.readGameState { result in
                 switch result {
                 case .success(let state):
-                    if state.firstPlayerID.isEmpty {
+                    if state.firstPlayerID == self.user.uid {
+                        self.isFirstPlayer = true
+                    } else if state.secondPlayerID == self.user.uid {
+                        self.isFirstPlayer = false
+                    } else if state.firstPlayerID.isEmpty {
                         self.server.activatePlayer(self.user.uid, isFirstPlayer: true)
                         self.isFirstPlayer = true
+                        self.onStateChange?(.noSecondPlayer)
                     } else if state.secondPlayerID.isEmpty {
                         self.server.activatePlayer(self.user.uid, isFirstPlayer: false)
                         self.isFirstPlayer = false
                     }
-                case .failure:
+                case .failure(let error):
                     print("Error reading game state")
+                    self.onStateChange?(.error(error.localizedDescription))
                 }
             }
         }
         
         onAppear = { [weak self] in
             guard let self else { return }
-            print("Did appear")
-            
+
             server.gameListener { [weak self] state in  // LISTENER
                 guard let self else { return }
                 if gameState != state {
                     gameState = state
                 }
             }
-            
-            onCountChanged?(gameState.sticksCount)
-            guard let isFirstPlayer else { return }
-            isYourTurn?(gameState.isFirstPlayerTurn == isFirstPlayer)
-            
+            onStateChange?(.playerTurn(sticksCount: gameState.sticksCount,
+                                       isYourTurn: gameState.isFirstPlayerTurn == isFirstPlayer))
         }
         
         onButtonTapped = { [weak self] num in
@@ -106,14 +120,12 @@ final class SticksViewModel {
         
         onRestartTapped = { [weak self] in
             guard let self else { return }
-            print("Restart")
             gameState = SticksGameModel()
         }
         
         viewDidDisappear = { [weak self] in
             guard let self, let isFirstPlayer else { return }
             server.deletePlayer(isFirstPlayer: isFirstPlayer)
-            //            gameState = SticksGameModel() // Restart?
         }
     }
 }
