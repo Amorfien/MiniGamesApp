@@ -36,7 +36,8 @@ final class MainCoordinator: CoordinatorProtocol {
 
     func showSticksScreen(for user: User) {
         let vm = SticksViewModel(user: user)
-        let vc = SticksViewController(viewModel: vm)
+        let vc = SticksTableViewController(viewModel: vm)
+//        let vc = SticksViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }
 }
