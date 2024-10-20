@@ -10,7 +10,7 @@ import SnapKit
 
 final class SignInViewController: UIViewController {
 
-    private let viewModel: SignInViewModel
+    private var viewModel: SignInViewModelProtocol
 
     private lazy var signInButton: UIButton = {
         let button = UIButton(primaryAction: signInAction)
@@ -27,7 +27,9 @@ final class SignInViewController: UIViewController {
         viewModel.onSignInTapped?()
     }
 
-    init(viewModel: SignInViewModel) {
+    // MARK: - Initialization
+    
+    init(viewModel: SignInViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -35,6 +37,8 @@ final class SignInViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    // MARK: - Lifecycle
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -54,16 +58,24 @@ final class SignInViewController: UIViewController {
         binding()
     }
 
+    // MARK: - Binding
+
     private func binding() {
 
-        viewModel.onSuccessSignIn = { [weak self] user in
+        viewModel.onSignInResult = { [weak self] result in
             guard let self else { return }
-
-        }
-
-        viewModel.onErrorSignIn = { [weak self] error in
-            guard let self else { return }
-            showErrorAlert(message: error)
+            switch result {
+            case .success(_):
+                UIView.animate(withDuration: 0.5) {
+                    self.signInButton.transform = CGAffineTransform(scaleX: 3, y: 3)
+                    self.signInButton.alpha = 0
+                } completion: { _ in
+                    self.signInButton.transform = .identity
+                    self.signInButton.alpha = 1
+                }
+            case .failure(let error):
+                showErrorAlert(message: error.localizedDescription)
+            }
         }
     }
 }

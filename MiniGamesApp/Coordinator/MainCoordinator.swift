@@ -21,12 +21,14 @@ final class MainCoordinator: CoordinatorProtocol {
 
     var navigationController: UINavigationController
 
+    private let authService = AuthService()
+
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
 
     func start() {
-        let viewModel = SignInViewModel()
+        let viewModel = SignInViewModel(authService: authService)
         let firstVC = SignInViewController(viewModel: viewModel)
         viewModel.coordinator = self
         navigationController.pushViewController(firstVC, animated: true)

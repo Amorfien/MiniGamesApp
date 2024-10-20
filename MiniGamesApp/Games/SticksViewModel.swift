@@ -33,25 +33,25 @@ final class SticksViewModel: SticksViewModelProtocol {
     
     private var isFirstPlayer: Bool?
     
-    private var gameState = SticksGameModel() {
+    private var gameModel = SticksGameModel() {
         didSet {
-            guard oldValue != gameState else { return }
+            guard oldValue != gameModel else { return }
             
             if isFirstPlayer == nil {
-                isFirstPlayer = gameState.firstPlayerID.isEmpty
+                isFirstPlayer = gameModel.firstPlayerID.isEmpty
             }
 
-            server.playerAction(gameState)
+            server.playerAction(gameModel)
 
-            if gameState.firstPlayerID.isEmpty || gameState.secondPlayerID.isEmpty {
+            if gameModel.firstPlayerID.isEmpty || gameModel.secondPlayerID.isEmpty {
                 onStateChange?(.noSecondPlayer)
             } else {
-                onStateChange?(.playerTurn(sticksCount: gameState.sticksCount,
-                                           isYourTurn: gameState.isFirstPlayerTurn == isFirstPlayer))
+                onStateChange?(.playerTurn(sticksCount: gameModel.sticksCount,
+                                           isYourTurn: gameModel.isFirstPlayerTurn == isFirstPlayer))
             }
 
-            if gameState.sticksCount == 0 {
-                onStateChange?(.gameOver(isWinner: gameState.isFirstPlayerTurn == isFirstPlayer))
+            if gameModel.sticksCount == 0 {
+                onStateChange?(.gameOver(isWinner: gameModel.isFirstPlayerTurn == isFirstPlayer))
             }
         }
     }
@@ -66,30 +66,35 @@ final class SticksViewModel: SticksViewModelProtocol {
     // Output
     var onStateChange: ((SticksGameState) -> Void)?
 
+    // MARK: - Initialization
+
     init(user: User) {
         self.user = user
         binding()
     }
-    
+
+    // MARK: - Binding
+
     private func binding() {
         
         viewDidLoad = { [weak self] in
             guard let self else { return }
             server.readGameState { result in
                 switch result {
-                case .success(let state):
-                    if state.firstPlayerID == self.user.uid {
+                case .success(let model):
+                    if model.firstPlayerID == self.user.uid {
                         self.isFirstPlayer = true
-                    } else if state.secondPlayerID == self.user.uid {
+                    } else if model.secondPlayerID == self.user.uid {
                         self.isFirstPlayer = false
-                    } else if state.firstPlayerID.isEmpty {
+                    } else if model.firstPlayerID.isEmpty {
                         self.server.activatePlayer(self.user.uid, isFirstPlayer: true)
                         self.isFirstPlayer = true
                         self.onStateChange?(.noSecondPlayer)
-                    } else if state.secondPlayerID.isEmpty {
+                    } else if model.secondPlayerID.isEmpty {
                         self.server.activatePlayer(self.user.uid, isFirstPlayer: false)
                         self.isFirstPlayer = false
                     }
+                    self.gameModel = model
                 case .failure(let error):
                     print("Error reading game state")
                     self.onStateChange?(.error(error.localizedDescription))
@@ -100,27 +105,25 @@ final class SticksViewModel: SticksViewModelProtocol {
         onAppear = { [weak self] in
             guard let self else { return }
 
-            server.gameListener { [weak self] state in  // LISTENER
+            server.gameListener { [weak self] model in  // LISTENER
                 guard let self else { return }
-                if gameState != state {
-                    gameState = state
+                if gameModel != model {
+                    gameModel = model
                 }
             }
-            onStateChange?(.playerTurn(sticksCount: gameState.sticksCount,
-                                       isYourTurn: gameState.isFirstPlayerTurn == isFirstPlayer))
         }
         
         onButtonTapped = { [weak self] num in
             guard let self else { return }
-            if gameState.sticksCount >= num {
-                let newValue = gameState.sticksCount - num
-                gameState = .init(sticksCount: newValue, isFirstPlayerTurn: !(isFirstPlayer ?? false))
+            if gameModel.sticksCount >= num {
+                let newValue = gameModel.sticksCount - num
+                gameModel = .init(sticksCount: newValue, isFirstPlayerTurn: !(isFirstPlayer ?? false))
             }
         }
         
         onRestartTapped = { [weak self] in
             guard let self else { return }
-            gameState = SticksGameModel()
+            gameModel = SticksGameModel()
         }
         
         viewDidDisappear = { [weak self] in

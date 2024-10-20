@@ -8,12 +8,17 @@
 import Foundation
 import FirebaseAuth
 
+protocol AuthServiceProtocol {
+
+    func anonymousSignIn(_ completion: @escaping (Result<User, Error>) -> Void)
+}
+
 enum AuthError: Error {
     case unknownError
 }
 
-final class AuthService {
-    
+final class AuthService: AuthServiceProtocol {
+
     func anonymousSignIn(_ completion: @escaping (Result<User, Error>) -> Void) {
         Auth.auth().signInAnonymously { result, error in
             guard let result, error == nil else {

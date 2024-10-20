@@ -73,6 +73,8 @@ class SticksViewController: UIViewController {
         viewModel.onRestartTapped?()
     }
 
+    // MARK: - Initialization
+
     init(viewModel: SticksViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -82,6 +84,8 @@ class SticksViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Sticks Game Screen"
@@ -109,6 +113,8 @@ class SticksViewController: UIViewController {
         viewModel.viewDidDisappear?()
     }
 
+    // MARK: - Binding
+
     private func binding() {
 
         viewModel.onStateChange = { [weak self] state in
@@ -117,8 +123,9 @@ class SticksViewController: UIViewController {
                 guard let self else { return }
                 switch state {
                 case .noSecondPlayer:
-                    playerLabel.text = "Waiting for second player"
-                    playerLabel.textColor  = .darkText
+                    countLabel.text = ". . ."
+                    playerLabel.text = "Waiting for second player..."
+                    playerLabel.textColor  = .label
                     changeInteractive(enabled: false)
                     changeSegmentInteractive(0)
                 case .playerTurn(sticksCount: let sticksCount, isYourTurn: let isYourTurn):
@@ -134,8 +141,28 @@ class SticksViewController: UIViewController {
                     playerLabel.textColor  = isYourTurn ? .systemGreen : .systemRed
                 case .gameOver(isWinner: let isWinner):
                     if let isWinner {
-                        playerLabel.text = isWinner ? "You WIN!" : "Fail..."
+                        playerLabel.text = isWinner ? "You WIN!" : "You Fail!"
                         playerLabel.textColor  = isWinner ? .systemGreen : .systemRed
+
+                        UIView.animate(
+                            withDuration: 1,
+                            delay: 0.3,
+                            usingSpringWithDamping: 0.2,
+                            initialSpringVelocity: 0
+                        ) {
+                            self.stackView.transform = CGAffineTransform(
+                                translationX: 0,
+                                y: isWinner ? -30 : 150
+                            )
+                        } completion: { _ in
+                            UIView.animate(
+                                withDuration: 2,
+                                delay: 1,
+                                options: .curveEaseInOut
+                            ) {
+                                self.stackView.transform = .identity
+                            }
+                        }
                     }
                     countLabel.text = "GAME OVER"
                     changeInteractive(enabled: false)

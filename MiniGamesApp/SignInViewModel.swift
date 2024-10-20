@@ -10,32 +10,38 @@ import FirebaseAuth
 
 protocol SignInViewModelProtocol {
 
+    var onAppear: EmptyClosure? { get }
+    var onSignInTapped: EmptyClosure? { get }
+    var onSignInResult: ((Result<User, Error>) -> Void)? { get set }
 }
 
-final class SignInViewModel {
+final class SignInViewModel: SignInViewModelProtocol {
 
     weak var coordinator: CoordinatorProtocol?
 
-    private let authService = AuthService()
+    private let authService: AuthServiceProtocol
 
     // Input
     var onAppear: EmptyClosure?
     var onSignInTapped: EmptyClosure?
 
     // Output
-    var onSuccessSignIn: ((User) -> Void)?
-    var onErrorSignIn: StringClosure?
+    var onSignInResult: ((Result<User, Error>) -> Void)?
 
-    init() {
+    // MARK: - Initialization
+    
+    init(authService: AuthServiceProtocol) {
+        self.authService = authService
         binding()
     }
+
+    // MARK: - Binding
 
     private func binding() {
 
         onAppear = { [weak self] in
             guard let self else { return }
             print("Did appear")
-
         }
 
         onSignInTapped = { [weak self]  in
@@ -44,14 +50,14 @@ final class SignInViewModel {
             authService.anonymousSignIn { result in
                 switch result {
                 case .success(let user):
-                    self.onSuccessSignIn?(user)
+                    self.onSignInResult?(.success(user))
                     print("SUCCESS SignIn ", user.uid)
 
                     self.coordinator?.showSticksScreen(for: user)
 
-                case .failure(let failure):
-                    self.onErrorSignIn?(failure.localizedDescription)
-                    print("ERROR SignIn ", failure.localizedDescription)
+                case .failure(let error):
+                    self.onSignInResult?(.failure(error))
+                    print("ERROR SignIn ", error.localizedDescription)
                 }
             }
         }

@@ -8,8 +8,14 @@
 import Foundation
 import FirebaseFirestore
 
+
 final class SticksServer {
-    
+
+    enum SticksServerError: Error {
+        case decodeError
+        case unknownError
+    }
+
     private let fbPath = Firestore.firestore()
         .collection(Resources.fbGamesCollection)
         .document(Resources.Games.sticks.rawValue)
@@ -17,6 +23,7 @@ final class SticksServer {
     func readGameState(_ completion: @escaping (Result<SticksGameModel, Error>) -> Void) {
         fbPath.getDocument() { snapshot, error in
             guard error == nil, let snapshot else {
+                completion(.failure(error ?? SticksServerError.unknownError))
                 print("ALARM!!! ", error?.localizedDescription ?? "")
                 return
             }
@@ -35,6 +42,8 @@ final class SticksServer {
                 )
                 print("WoW ", state.sticksCount, " ", state.isFirstPlayerTurn)
                 completion(.success(state))
+            } else {
+                completion(.failure(SticksServerError.decodeError))
             }
         }
     }
